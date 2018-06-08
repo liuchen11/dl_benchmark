@@ -2,17 +2,17 @@
 
 import numpy as np
 
-def lr_parser(policy, epoch_num):
+def parse_lr(policy, epoch_num):
 
-    policy_parts = policy.split(',')
-    if policy_parts[0].lower() in ['c']:
-        lr_list = constant(value = int(policy_parts[1]), epoch_num = epoch_num)
-    elif policy_parts[0].lower() in ['exp_decay']:
-        lr_list = exp_decay(start_value = float(policy_parts[1]), decay_ratio = float(policy_parts[2]),
-            decay_freq = int(policy_parts[3]), epoch_num = epoch_num)
-    elif policy_parts[0].lower() in ['exp_drop']:
-        lr_list = exp_drop(start_value = float(policy_parts[1]), decay_ratio = float(policy_parts[2]),
-            milestones = list(map(int, policy_parts[3:])), epoch_num = epoch_num)
+    if policy['name'].lower() in ['c', 'constant']:
+        lr_list = constant(value = int(policy['value']), epoch_num = epoch_num)
+    elif policy['name'].lower() in ['exp_decay']:
+        lr_list = exp_decay(start_value = policy['start_value'], decay_ratio = policy['decay_ratio'],
+            decay_freq = int(policy['decay_freq']), epoch_num = epoch_num)
+    elif policy['name'].lower() in ['exp_drop']:
+        milestones = list(map(int, policy['milestones'].split('_'))) if isinstance(policy['milestones'], str) else [policy['milestones'],]
+        lr_list = exp_drop(start_value = policy['start_value'], decay_ratio = policy['decay_ratio'],
+            milestones = milestones, epoch_num = epoch_num)
     else:
         raise ValueError('Unrecognized learning rate policy: %s'%policy)
 

@@ -8,12 +8,16 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from cv.cifar10.models.resnet import ResNet_3b
+
 from util.dataset import cifar10
 from util.train import train_test
-from util.lr_parser import lr_parser
+from util.param_parser import DictParser
+from util.lr_parser import parse_lr
+from util.optim_parser import parse_optim
 from util.device_parser import parse_device_alloc
 
-from cv.cifar10.models.resnet import ResNet_3b
+from optim.ema import EMA
 
 if __name__ == '__main__':
 
@@ -27,15 +31,17 @@ if __name__ == '__main__':
         help = 'the depth of the resnet, default = 44')
     parser.add_argument('--epoch_num', type = int, default = 200,
         help = 'the total number of epochs, default = 200')
-    parser.add_argument('--lr_policy', type = str, default = 'exp_drop,0.1,0.1,100,150',
-        help = 'learning rate schedule, default = "exp_drop,0.1,0.1,100,150"')
-    parser.add_argument('--momentum', type = float, default = 0.9,
-        help = 'the momentum value, default = 0.9')
-    parser.add_argument('--weight_decay', type = float, default = 1e-4,
-        help = 'weight decay, default = 1e-4')
+    parser.add_argument('--lr_policy', action = DictParser,
+        default = {'name': 'exp_drop', 'start_value': 0.1, 'decay_ratio': 0.1, 'milestones': '100_150'},
+        help = 'lr policy, default is name=exp_drop,start_value=0.1,decay_rato=0.1,milestones=100_150')
+    parser.add_argument('--optim_policy', action = DictParser,
+        default = {'name': 'sgd', 'lr': 0.1, 'momentum': 0.9, 'weight_decay': 1e-4},
+        help = 'optimizer config, default is name=sgd,lr=0.1,momentum=0.9,weight_decay=1e-4')
+    parser.add_argument('--ema', type = float, default = None,
+        help = 'the parameter for exponentially moving average, default = None, means no such trick')
 
     parser.add_argument('--gpu', type = int, default = None,
-        help = 'specify which gpu to use, default = None, supported values can be "cpu", "1", "1,2" etc.')
+        help = 'specify which gpu to use, default = None')
     parser.add_argument('--output_folder', type = str, default = None,
         help = 'the output folder')
     parser.add_argument('--model_name', type = str, default = 'model',
@@ -43,6 +49,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.batch_size_test = args.batch_size if args.batch_size_test == None else args.batch_size_test
+    args.ema = None if args.ema < 0 else args.ema
     if not os.path.exists(args.output_folder):
         os.makedirs(args.output_folder)
 
@@ -52,11 +59,18 @@ if __name__ == '__main__':
 
     device, model = parse_device_alloc(device_config = args.gpu, model = model)
 
-    lr_list = lr_parser(policy = args.lr_policy, epoch_num = args.epoch_num)
+    lr_list = parse_lr(policy = args.lr_policy, epoch_num = args.epoch_num)
+    optimizer = parse_optim(policy = args.optim_policy, params = model.parameters())
 
     setup_config = {kwarg: value for kwarg, value in args._get_kwargs()}
     setup_config['lr_list'] = lr_list
-    optimizer = torch.optim.SGD(model.parameters(), lr_list[0], momentum = args.momentum, weight_decay = args.weight_decay)
+
+    tricks = {}
+    if args.ema != None:
+        assert args.ema > 0 and args.ema < 1, 'The decaying ratio for EMA must be in (0, 1)'
+        ema_wrapper = EMA(args.ema)
+        ema_wrapper.register_model(model = model)
+        tricks['ema'] = ema_wrapper
 
     results = train_test(setup_config = setup_config, model = model, train_loader = train_loader, test_loader = test_loader, epoch_num = args.epoch_num,
-        optimizer = optimizer, lr_list = lr_list,  output_folder = args.output_folder, model_name = args.model_name, device = device)
+        optimizer = optimizer, lr_list = lr_list,  output_folder = args.output_folder, model_name = args.model_name, device = device, **tricks)

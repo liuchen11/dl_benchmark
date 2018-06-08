@@ -14,7 +14,8 @@ from util.evaluation import AverageCalculator
 from util.evaluation import accuracy
 
 def train_test(setup_config, model, train_loader, test_loader, epoch_num,
-    optimizer, lr_list, output_folder, model_name, device, criterion = nn.CrossEntropyLoss()):
+    optimizer, lr_list, output_folder, model_name, device,
+    criterion = nn.CrossEntropyLoss(), **tricks):
     '''
     >>> general training function without validation set
     '''
@@ -56,6 +57,9 @@ def train_test(setup_config, model, train_loader, test_loader, epoch_num,
             acc = accuracy(logits.data, label_batch)
             acc_calculator.update(acc.item(), data_batch.size(0))
             loss_calculator.update(loss.item(), data_batch.size(0))
+
+            if 'ema' in tricks and tricks['ema'] != None:
+                tricks['ema'].update_model(model = model)
 
         print('Training loss after epoch %d: %.4f'%(epoch_idx + 1, loss_calculator.average))
         tosave['train_acc'][epoch_idx] = acc_calculator.average

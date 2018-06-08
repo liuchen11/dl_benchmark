@@ -1,14 +1,16 @@
 ## Benchmarks for Computer Vision in Pytorch
 
-###Cifar10###
+### Cifar10
 
-####ConvNet####
+#### ConvNet
 
 ```
 python cv/cifar10/run/cifar10_cnn1.py --batch_size_test 100 --output_folder $OUTPUT_FOLDER$ --model_name $MODEL_NAME$
 ```
 
-####ResNet###
+Expected accuracy is around 85%
+
+#### ResNet
 
 ```
 python cv/cifar10/run/cifar10_resnet3b.py --batch_size_test 100 --depth $DEPTH$ --output_folder $OUTPUT_FOLDER$ --model_name $MODEL_NAME$
@@ -16,5 +18,5 @@ python cv/cifar10/run/cifar10_resnet3b.py --batch_size_test 100 --depth $DEPTH$ 
 
 | Model    | Test Accuracy |
 |----------|---------------|
-| ResNet20 |               |
-| ResNet44 | 92.8%         |
+| ResNet20 |    92.3%      |
+| ResNet44 |    92.8%      |
