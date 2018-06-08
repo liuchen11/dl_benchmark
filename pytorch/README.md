@@ -19,4 +19,9 @@ python cv/cifar10/run/cifar10_resnet3b.py --batch_size_test 100 --depth $DEPTH$ 
 | Model    | Test Accuracy |
 |----------|---------------|
 | ResNet20 |    92.3%      |
-| ResNet44 |    92.8%      |
+| ResNet44 |    93.1%      |
+
+
+### ImageNet
+
+

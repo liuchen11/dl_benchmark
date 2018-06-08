@@ -4,6 +4,24 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+instructions = '''
+instructions for setting an optimizer
+>>> SGD
+name=sgd,lr=$LR$,momentum=$0.9$,dampening=$0$,weight_decay=$0$
+
+>>> Adagrad
+name=adagrad,lr=$LR$,lr_decay=$0$,weight_decay=$0$
+
+>>> Adadelta
+name=adadelta,lr=$LR$,rho=$0.9$,eps=$1e-6$,weight_decay=$0$
+
+>>> Adam
+name=adam,lr=$LR$,beta1=$0.9$,beta2=$0.999$,eps=$1e-8$,weight_decay=$0$,amsgrad=$0$
+
+>>> RMSprop
+name=rmsprop,lr=$LR$,alpha=$0.99$,eps=$1e-8$,weight_decay=$0$,momentum=$0$
+'''
+
 def parse_optim(policy, params):
 
     kwargs = {}
@@ -48,6 +66,11 @@ def parse_optim(policy, params):
         kwargs['weight_decay'] = policy['weight_decay'] if 'weight_decay' in policy else 0.
         kwargs['momentum'] = policy['momentum'] if 'momentum' in policy else 0.
         optimizer = torch.optim.RMSprop(params, **kwargs)
+
+    elif policy['name'].lower() in ['h', 'help']:
+
+        print(instructions)
+        exit(0)
 
     else:
         raise ValueError('Unrecognized policy: %s'%policy)

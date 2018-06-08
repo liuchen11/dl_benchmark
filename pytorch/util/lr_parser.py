@@ -2,6 +2,18 @@
 
 import numpy as np
 
+instructions = '''
+instructions for setting a learning rate schedule
+>>> constant learning rate: lr = v
+name=constant,value=$VALUE$
+
+>>> exponentially decaying learning rate, lr = v * ratio ** (n / decay_freq)
+name=exp_decay,start_value=$VALUE$,decay_ratio=$VALUE$,decay_freq=$VALUE$
+
+>>> exponentially dropping learning rate, each time meets a milestone, decrease the lr
+name=exp_drop,start_value=$VALUE$,decay_ratio=$VALUE$,milestones=$VALUE1_VALUE2_...._VALUE$
+'''
+
 def parse_lr(policy, epoch_num):
 
     if policy['name'].lower() in ['c', 'constant']:
@@ -13,10 +25,18 @@ def parse_lr(policy, epoch_num):
         milestones = list(map(int, policy['milestones'].split('_'))) if isinstance(policy['milestones'], str) else [policy['milestones'],]
         lr_list = exp_drop(start_value = policy['start_value'], decay_ratio = policy['decay_ratio'],
             milestones = milestones, epoch_num = epoch_num)
+    elif policy['name'].lower() in ['h', 'help']:
+        print(instructions)
+        exit(0)
     else:
         raise ValueError('Unrecognized learning rate policy: %s'%policy)
 
     assert len(lr_list) == epoch_num, 'Error: len(lr_list) = %d, epoch_num = %d'%(len(lr_list), epoch_num)
+
+    print('LR policy: %s --'%policy['name'])
+    for key in policy:
+        print('%s: %s'%(key, policy[key]))
+    print('----------------')
 
     return lr_list
 
