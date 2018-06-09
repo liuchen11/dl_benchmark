@@ -14,15 +14,17 @@ from util.evaluation import AverageCalculator
 from util.evaluation import accuracy
 
 def train_test(setup_config, model, train_loader, test_loader, epoch_num,
-    optimizer, lr_list, output_folder, model_name, device,
+    optimizer, lr_list, output_folder, model_name, device_ids,
     criterion = nn.CrossEntropyLoss(), **tricks):
     '''
     >>> general training function without validation set
     '''
 
     tosave = {'model_summary': str(model), 'setup_config': setup_config, 'train_loss': {}, 'train_acc': {}, 'test_loss': {}, 'test_acc': {}}
-    if not device in ['cpu']:
-        criterion = criterion.cuda()
+    device = torch.device('cuda:0' if not device_ids in ['cpu'] and torch.cuda.is_available() else 'cpu')
+    if not device_ids in ['cpu']:
+        criterion = criterion.cuda(device)
+        model = model.cuda(device)
 
     acc_calculator = AverageCalculator()
     loss_calculator = AverageCalculator()
@@ -39,9 +41,9 @@ def train_test(setup_config, model, train_loader, test_loader, epoch_num,
         model.train()                 # Switch to Train Mode
         for idx, (data_batch, label_batch) in enumerate(train_loader, 0):
 
-            if not device in ['cpu']: # Use of GPU
-                data_batch_var = Variable(data_batch).cuda()
-                label_batch = label_batch.cuda(async = True)
+            if not device_ids in ['cpu']: # Use of GPU
+                data_batch_var = Variable(data_batch).cuda(device)
+                label_batch = label_batch.cuda(device, async = True)
                 label_batch_var = Variable(label_batch)
             else:
                 data_batch_var = Variable(data_batch)
@@ -70,9 +72,9 @@ def train_test(setup_config, model, train_loader, test_loader, epoch_num,
         model.eval()                    # Switch to Evaluation Mode
         for idx, (data_batch, label_batch) in enumerate(test_loader, 0):
 
-            if not device in ['cpu']:   # Use of GPU
-                data_batch = Variable(data_batch).cuda()
-                label_batch = Variable(label_batch.cuda(async = True))
+            if not device_ids in ['cpu']:   # Use of GPU
+                data_batch = Variable(data_batch).cuda(device)
+                label_batch = Variable(label_batch.cuda(device, async = True))
             else:
                 data_batch = Variable(data_batch)
                 label_batch = Variable(label_batch)
