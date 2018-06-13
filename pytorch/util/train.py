@@ -90,6 +90,10 @@ def train_test(setup_config, model, train_loader, test_loader, epoch_num,
         tosave['test_acc'][epoch_idx] = acc_calculator.average
         tosave['test_loss'][epoch_idx] = loss_calculator.average
 
+        if 'snapshots' in tricks and (epoch_idx + 1) in tricks['snapshots']:
+            print('snapshot saved in epoch %d'%(epoch_idx + 1))
+            torch.save(model.state_dict(), os.path.join(output_folder, '%s_%d.ckpt'%(model_name, epoch_idx + 1)))
+
         pickle.dump(tosave, open(os.path.join(output_folder, '%s.pkl'%model_name), 'wb'))
         torch.save(model.state_dict(), os.path.join(output_folder, '%s.ckpt'%model_name))
 

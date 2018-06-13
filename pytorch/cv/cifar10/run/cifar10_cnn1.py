@@ -38,6 +38,8 @@ if __name__ == '__main__':
     parser.add_argument('--ema', type = float, default = 0.9999,
         help = 'the parameter for exponentially moving average, default = 0.9999')
 
+    parser.add_argument('--snapshots', type = str, default = None,
+        help = 'check points to save some intermediate ckpts, default = None, values separated by ","')
     parser.add_argument('--gpu', type = str, default = None,
         help = 'specify which gpu to use, default = None')
     parser.add_argument('--output_folder', type = str, default = None,
@@ -47,6 +49,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.batch_size_test = args.batch_size if args.batch_size_test == None else args.batch_size_test
+    args.snapshots = list(map(int, args.snapshots.split(','))) if args.snapshots != None else None
     args.ema = None if args.ema < 0 else args.ema
     config_visible_gpu(args.gpu)
 
@@ -70,6 +73,8 @@ if __name__ == '__main__':
         ema_wrapper = EMA(args.ema)
         ema_wrapper.register_model(model = model)
         tricks['ema'] = ema_wrapper
+    if args.snapshots != None:
+        tricks['snapshots'] = args.snapshots
 
     results = train_test(setup_config = setup_config, model = model, train_loader = train_loader, test_loader = test_loader, epoch_num = args.epoch_num,
         optimizer = optimizer, lr_list = lr_list, output_folder = args.output_folder, model_name = args.model_name, device_ids = device_ids, **tricks)
