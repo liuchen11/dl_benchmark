@@ -14,6 +14,7 @@ class ConvNet(nn.Module):
 class ConvNet1(ConvNet):
     '''
     >>> ConvNet consisting two convolutional layer and three fully connected layer
+    >>> Same structure for TensorFlow tutorial
     >>> Suitable for CIFAR10
     '''
 
