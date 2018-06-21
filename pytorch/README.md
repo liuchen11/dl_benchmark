@@ -16,7 +16,7 @@ A 3-layer fully-connected model with 300, 100 as the dimension of hidden layer. 
 python cv/mnist/run/mnist_cnn1.py --batch_size_test 100 --output_folder $OUTPUT_FOLDER$ --model_name $MODEL_NAME$
 ```
 
-The same architecture as the ![convnet for mnist in tensorflow tutorial](https://github.com/tensorflow/models/blob/master/tutorials/image/mnist/convolutional.py). Test accuracy is around 99.4%.
+The same architecture as the [convnet for mnist in tensorflow tutorial](https://github.com/tensorflow/models/blob/master/tutorials/image/mnist/convolutional.py). Test accuracy is around 99.4%.
 
 ### Cifar10
 
@@ -26,7 +26,7 @@ The same architecture as the ![convnet for mnist in tensorflow tutorial](https:/
 python cv/cifar10/run/cifar10_cnn1.py --batch_size_test 100 --output_folder $OUTPUT_FOLDER$ --model_name $MODEL_NAME$
 ```
 
-The same architecture as the ![convnet for cifar10 in tensorflow tutorial](https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py). Test accuracy is around 85%.
+The same architecture as the [convnet for cifar10 in tensorflow tutorial](https://github.com/tensorflow/models/blob/master/tutorials/image/cifar10/cifar10.py). Test accuracy is around 85%.
 
 #### ResNet
 
