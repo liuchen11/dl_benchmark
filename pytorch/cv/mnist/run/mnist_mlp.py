@@ -27,7 +27,7 @@ if __name__ == '__main__':
         help = 'batch size during test phrase, default is the same value during training')
     parser.add_argument('--epoch_num', type = int, default = 50,
         help = 'the total number of epochs, default = 50')
-    parser.add_argument('--hidden_dims', type = str, default = '300',
+    parser.add_argument('--hidden_dims', type = str, default = '300,100',
         help = 'neurons in each hidden layer, separated by ","')
     parser.add_argument('--dropout', type = float, default = None,
         help = 'dropout config, default = None')

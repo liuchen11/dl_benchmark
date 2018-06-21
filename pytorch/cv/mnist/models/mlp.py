@@ -25,11 +25,13 @@ class MLP(nn.Module):
         if not isinstance(dropout_each_layer, (tuple, list)):
             dropout_each_layer = [dropout,] * len(hidden_dims)
 
-        for in_dim, out_dim, dropout_this_layer in zip(self.neurons[:-2], self.neurons[1:-1], dropout_each_layer):
+        for idx, (in_dim, out_dim, dropout_this_layer) in enumerate(zip(self.neurons[:-2], self.neurons[1:-1], dropout_each_layer)):
             sub_layers = [nn.Linear(in_dim, out_dim), nn.ReLU()]
             if dropout_this_layer != None:
                 sub_layers.append(nn.Dropout(p = dropout_this_layer))
-            self.layers.append(nn.Sequential(*sub_layers))
+            current_layer = nn.Sequential(*sub_layers)
+            self.layers.append(nn.Sequential(current_layer))
+            exec('self.layer%d = current_layer'%(idx + 1))                # component layers must be objects of the class in order to be moved to GPU altogether
 
         self.output = nn.Linear(self.neurons[-2], output_class)
 
