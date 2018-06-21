@@ -12,7 +12,7 @@ from cv.mnist.models.mlp import MLP
 from util.dataset import mnist
 from util.train import train_test
 
-from util.param_parser import DictParser
+from util.param_parser import DictParser, IntListParser
 from util.lr_parser import parse_lr
 from util.optim_parser import parse_optim
 from util.device_parser import parse_device_alloc, config_visible_gpu
@@ -27,7 +27,7 @@ if __name__ == '__main__':
         help = 'batch size during test phrase, default is the same value during training')
     parser.add_argument('--epoch_num', type = int, default = 50,
         help = 'the total number of epochs, default = 50')
-    parser.add_argument('--hidden_dims', type = str, default = '300,100',
+    parser.add_argument('--hidden_dims', action = IntListParser, default = [300, 100],
         help = 'neurons in each hidden layer, separated by ","')
     parser.add_argument('--dropout', type = float, default = None,
         help = 'dropout config, default = None')
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         default = {'name': 'sgd', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4},
         help = 'optimizer config, default is name=sgd,lr=0.01,momentum=0.9,weight_decay=5e-4')
 
-    parser.add_argument('--snapshots', type = str, default = None,
+    parser.add_argument('--snapshots', action = IntListParser, default = None,
         help = 'check points to save some intermediate ckpts, default = None, values separated by ","')
     parser.add_argument('--gpu', type = str, default = None,
         help = 'specify which gpu to use, default = None')
@@ -49,8 +49,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.batch_size_test = args.batch_size if args.batch_size_test == None else args.batch_size_test
-    args.hidden_dims = list(map(int, args.hidden_dims.split(',')))
-    args.snapshots = list(map(int, args.snapshots.split(','))) if args.snapshots != None else None
     config_visible_gpu(args.gpu)
 
     train_loader, test_loader = mnist(batch_size = args.batch_size, batch_size_test = args.batch_size_test)

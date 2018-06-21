@@ -12,7 +12,7 @@ from cv.cifar10.models.cnn import ConvNet1
 from util.dataset import cifar10
 from util.train import train_test
 
-from util.param_parser import DictParser
+from util.param_parser import DictParser, IntListParser
 from util.lr_parser import parse_lr
 from util.optim_parser import parse_optim
 from util.device_parser import parse_device_alloc, config_visible_gpu
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('--ema', type = float, default = 0.9999,
         help = 'the parameter for exponentially moving average, default = 0.9999')
 
-    parser.add_argument('--snapshots', type = str, default = None,
+    parser.add_argument('--snapshots', action = IntListParser, default = None
         help = 'check points to save some intermediate ckpts, default = None, values separated by ","')
     parser.add_argument('--gpu', type = str, default = None,
         help = 'specify which gpu to use, default = None')
@@ -49,7 +49,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.batch_size_test = args.batch_size if args.batch_size_test == None else args.batch_size_test
-    args.snapshots = list(map(int, args.snapshots.split(','))) if args.snapshots != None else None
     args.ema = None if args.ema < 0 else args.ema
     config_visible_gpu(args.gpu)
 

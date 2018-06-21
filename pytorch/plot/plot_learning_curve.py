@@ -9,12 +9,13 @@ import argparse
 import numpy as np
 
 from plot.color import get_color
+from util.param_parser import ListParser
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--pkl_file', type = str, default = None,
+    parser.add_argument('--pkl_file', action = ListParser, default = None,
         help = 'the file(s) to be loaded')
     parser.add_argument('--metric', type = str, default = None,
         help = 'to plot the loss or error rate, default = None')
@@ -22,7 +23,6 @@ if __name__ == '__main__':
         help = 'the output image, default = None')
 
     args = parser.parse_args()
-    args.pkl_file = args.pkl_file.split(',')
 
     if args.output != None:
         if os.sep in args.output and not os.path.exists(os.path.dirname(args.output)):
