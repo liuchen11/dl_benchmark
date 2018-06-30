@@ -29,7 +29,7 @@ if __name__ == '__main__':
         help = 'the total number of epochs, default = 10')
     parser.add_argument('--lr_policy', action = DictParser,
         default = {'name': 'exp_decay', 'start_value': 0.01, 'decay_ratio': 0.95, 'decay_freq': 1},
-        help = 'lr policy, default is name=exp_decay,start_value=0.01,decay_rato=0.95,decay_freq=1')
+        help = 'lr policy, default is name=exp_decay,start_value=0.01,decay_ratio=0.95,decay_freq=1')
     parser.add_argument('--optim_policy', action = DictParser,
         default = {'name': 'sgd', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4},
         help = 'optimizer config, default is name=sgd,lr=0.01,momentum=0.9,weight_decay=5e-4')
