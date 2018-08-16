@@ -9,7 +9,7 @@ class DictParser(argparse.Action):
         super(DictParser, self).__init__(*args, **kwargs)
         self.local_dict = {}
 
-    def __call__(self, parser, namespace, values):
+    def __call__(self, parser, namespace, values, option_string = None):
 
         for kv in values.split(','):
             k, v = kv.split('=')

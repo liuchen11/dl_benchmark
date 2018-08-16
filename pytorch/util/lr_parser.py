@@ -17,7 +17,7 @@ name=exp_drop,start_value=$VALUE$,decay_ratio=$VALUE$,milestones=$VALUE1_VALUE2_
 def parse_lr(policy, epoch_num):
 
     if policy['name'].lower() in ['c', 'constant']:
-        lr_list = constant(value = int(policy['value']), epoch_num = epoch_num)
+        lr_list = constant(value = policy['value'], epoch_num = epoch_num)
     elif policy['name'].lower() in ['exp_decay']:
         lr_list = exp_decay(start_value = policy['start_value'], decay_ratio = policy['decay_ratio'],
             decay_freq = int(policy['decay_freq']), epoch_num = epoch_num)
