@@ -38,7 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('--ema', type = float, default = 0.9999,
         help = 'the parameter for exponentially moving average, default = 0.9999')
 
-    parser.add_argument('--snapshots', action = IntListParser, default = None
+    parser.add_argument('--snapshots', action = IntListParser, default = None,
         help = 'check points to save some intermediate ckpts, default = None, values separated by ","')
     parser.add_argument('--gpu', type = str, default = None,
         help = 'specify which gpu to use, default = None')

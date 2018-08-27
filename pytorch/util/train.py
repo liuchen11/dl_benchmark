@@ -24,7 +24,6 @@ def train_test(setup_config, model, train_loader, test_loader, epoch_num,
     device = torch.device('cuda:0' if not device_ids in ['cpu'] and torch.cuda.is_available() else 'cpu')
     if not device_ids in ['cpu']:
         criterion = criterion.cuda(device)
-        model = model.cuda(device)
 
     acc_calculator = AverageCalculator()
     loss_calculator = AverageCalculator()
@@ -42,15 +41,14 @@ def train_test(setup_config, model, train_loader, test_loader, epoch_num,
         for idx, (data_batch, label_batch) in enumerate(train_loader, 0):
 
             if not device_ids in ['cpu']: # Use of GPU
-                data_batch_var = Variable(data_batch).cuda(device)
-                label_batch = label_batch.cuda(device, async = True)
-                label_batch_var = Variable(label_batch)
+                data_batch = Variable(data_batch).cuda(device)
+                label_batch = Variable(label_batch.cuda(device, async = True))
             else:
-                data_batch_var = Variable(data_batch)
-                label_batch_var = Variable(label_batch)
+                data_batch = Variable(data_batch)
+                label_batch = Variable(label_batch)
 
-            logits = model(data_batch_var)
-            loss = criterion(logits, label_batch_var)
+            logits = model(data_batch)
+            loss = criterion(logits, label_batch)
             
             optimizer.zero_grad()
             loss.backward()
