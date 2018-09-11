@@ -28,7 +28,7 @@ class ListParser(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string = None):
 
-        self.local_list = value.split(',')
+        self.local_list = values.split(',')
 
         setattr(namespace, self.dest, self.local_list)
 
