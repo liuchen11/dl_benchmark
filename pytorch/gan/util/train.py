@@ -22,7 +22,7 @@ def wgan_train(netD, netG, optimD, optimG, iter_num, critic_iters,
             netD.zero_grad()
  
             # Real data
-            data_batch = data.next()
+            data_batch = data_loader.next()
             data_batch = torch.Tensor(data_batch)
             if use_gpu:
                 data_batch = data_batch.cuda()
@@ -47,7 +47,7 @@ def wgan_train(netD, netG, optimD, optimG, iter_num, critic_iters,
                 alpha = alpha.cuda()
             point_batch = alpha * data_batch + (1. - alpha) * fake_batch
             point_batch = Variable(point_batch, requires_grad = True)
-            point_batch = netD(point_batch)
+            point_score = netD(point_batch)
 
             basic_grad = torch.ones(point_score.size())
             if use_gpu:
@@ -78,10 +78,12 @@ def wgan_train(netD, netG, optimD, optimG, iter_num, critic_iters,
 
         optimG.step()
 
-        score_ture_data = netD(data_batch).mean()
+        score_true_data = netD(data_batch).mean()
         score_fake_data = netD(fake_batch).mean()
         W_distance = score_true_data - score_fake_data
         W_distance_list.append(W_distance)
+
+        print('iter = %d/ %d, score = %.3f - %.3f = %.3f'%(iter_idx, iter_num, score_true_data, score_fake_data, W_distance))
 
         if plot_freq != None and (iter_idx + 1) % plot_freq == 0:
             netG.eval()

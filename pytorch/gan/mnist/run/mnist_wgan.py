@@ -47,8 +47,8 @@ if __name__ == '__main__':
 
     netG = MNIST_Generator()
     netD = MNIST_Discriminator()
-    netG.apply(weight_init)
-    netD.apply(weight_init)
+    netG.weight_init()
+    netD.weight_init()
 
     _, netG = parse_device_alloc(device_config = None, model = netG)
     _, netD = parse_device_alloc(device_config = None, model = netD)
