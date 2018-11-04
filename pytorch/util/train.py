@@ -14,7 +14,7 @@ from util.evaluation import AverageCalculator
 from util.evaluation import accuracy
 
 def train_test(setup_config, model, train_loader, test_loader, epoch_num,
-    optimizer, lr_list, output_folder, model_name, device_ids,
+    optimizer, lr_func, output_folder, model_name, device_ids,
     criterion = nn.CrossEntropyLoss(), **tricks):
     '''
     >>> general training function without validation set
@@ -25,20 +25,23 @@ def train_test(setup_config, model, train_loader, test_loader, epoch_num,
     if not device_ids in ['cpu']:
         criterion = criterion.cuda(device)
 
+    idx_list = [idx for idx, (data_batch, label_batch) in enumerate(train_loader, 0)]
+    batches_per_epoch = len(idx_list)
+
     acc_calculator = AverageCalculator()
     loss_calculator = AverageCalculator()
     for epoch_idx in range(epoch_num):
 
-        lr_this_epoch = lr_list[epoch_idx]
-        for param_group in optimizer.param_groups:
-            param_group['lr'] = lr_this_epoch
-
-        print('Epoch %d: lr = %1.2e'%(epoch_idx, lr_this_epoch))
+        print('Epoch %d: lr = %1.2e'%(epoch_idx, lr_func(epoch_idx)))
 
         acc_calculator.reset()
         loss_calculator.reset()
         model.train()                 # Switch to Train Mode
         for idx, (data_batch, label_batch) in enumerate(train_loader, 0):
+
+            epoch_value = epoch_idx + float(idx) / float(batches_per_epoch)
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = lr_func(epoch_value)
 
             if not device_ids in ['cpu']: # Use of GPU
                 data_batch = Variable(data_batch).cuda(device)

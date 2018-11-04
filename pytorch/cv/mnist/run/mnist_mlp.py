@@ -57,11 +57,11 @@ if __name__ == '__main__':
 
     device_ids, model = parse_device_alloc(device_config = None, model = model)
 
-    lr_list = parse_lr(policy = args.lr_policy, epoch_num = args.epoch_num)
+    lr_func = parse_lr(policy = args.lr_policy, epoch_num = args.epoch_num)
     optimizer = parse_optim(policy = args.optim_policy, params = model.parameters())
 
     setup_config = {kwarg: value for kwarg, value in args._get_kwargs()}
-    setup_config['lr_list'] = lr_list
+    setup_config['lr_list'] = [lr_func(idx) for idx in range(args.epoch_num)]
     if not os.path.exists(args.output_folder):
         os.makedirs(args.output_folder)
 
@@ -70,5 +70,5 @@ if __name__ == '__main__':
         tricks['snapshots'] = args.snapshots
 
     results = train_test(setup_config = setup_config, model = model, train_loader = train_loader, test_loader = test_loader, epoch_num = args.epoch_num,
-        optimizer = optimizer, lr_list = lr_list, output_folder = args.output_folder, model_name = args.model_name, device_ids = device_ids, **tricks)
+        optimizer = optimizer, lr_func = lr_func, output_folder = args.output_folder, model_name = args.model_name, device_ids = device_ids, **tricks)
 

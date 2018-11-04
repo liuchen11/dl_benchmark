@@ -8,10 +8,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from cv.cifar10.models.cnn import ConvNet1
+from cv.cifar10.models.densenet import DenseNet
 from util.dataset import cifar10
 from util.train import train_test
-
 from util.param_parser import DictParser, IntListParser
 from util.lr_parser import parse_lr
 from util.optim_parser import parse_optim
@@ -23,20 +22,32 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--batch_size', type = int, default = 128,
-        help = 'input batch size, default = 128')
+    parser.add_argument('--batch_size', type = int, default = 64,
+        help = 'input batch size, default = 64')
     parser.add_argument('--batch_size_test', type = int, default = None,
         help = 'batch size during test phrase, default is the same value during training')
-    parser.add_argument('--epoch_num', type = int, default = 1280,
-        help = 'the total number of epochs, default = 1280')
+
+    parser.add_argument('--input_channels', type = int, default = 24,
+        help = 'the number of input channels, default = 24')
+    parser.add_argument('--growth_rate', type= int, default = 12,
+        help = 'the grow rate of densenet, default = 12')
+    parser.add_argument('--compression', type = float, default = 0.5,
+        help = 'the compression rate of dense net, default = 0.5')
+    parser.add_argument('--depth', type = int, default = 100,
+        help = 'the number of total layers, default = 100')
+    parser.add_argument('--efficient', type = int, default = 0,
+        help = 'whether or not to use efficient implementation, default = 0, meaning no')
+
+    parser.add_argument('--epoch_num', type = int, default = 300,
+        help = 'the total number of epochs, default = 300')
     parser.add_argument('--lr_policy', action = DictParser,
-        default = {'name': 'exp_decay', 'start_value': 0.1, 'decay_ratio': 0.1, 'decay_freq': 350},
-        help = 'lr policy, default is name=exp_decay,start_value=0.1,decay_rato=0.1,decay_freq=350')
+        default = {'name': 'exp_drop', 'start_value': 0.1, 'decay_ratio': 0.1, 'milestones': '150_225'},
+        help = 'lr policy, default is name=exp_drop,start_value=0.1,decay_ratio=0.1,milestones=150_225')
     parser.add_argument('--optim_policy', action = DictParser,
-        default = {'name': 'sgd', 'lr': 0.1, 'momentum': 0.0, 'weight_decay': 0.0},
-        help = 'optimizer config, default is name=sgd,lr=0.1,momentum=0.0,weight_decay=0.0')
-    parser.add_argument('--ema', type = float, default = 0.9999,
-        help = 'the parameter for exponentially moving average, default = 0.9999')
+        default = {'name': 'sgd', 'lr': 0.1, 'momentum': 0.9, 'weight_decay': 1e-4},
+        help = 'optimizer config, default is name=sgd,lr=0.1,momentum=0.9,weight_decay=1e-4')
+    parser.add_argument('--ema', type = float, default = None,
+        help = 'the parameter for exponentially moving average, default = None, means no such trick')
 
     parser.add_argument('--snapshots', action = IntListParser, default = None,
         help = 'check points to save some intermediate ckpts, default = None, values separated by ","')
@@ -54,7 +65,11 @@ if __name__ == '__main__':
 
     train_loader, test_loader = cifar10(batch_size = args.batch_size, batch_size_test = args.batch_size_test)
 
-    model = ConvNet1(input_size = [32, 32], input_channels = 3, output_class = 10, use_lrn = True)
+    assert (args.depth - 4) % 6 == 0, 'the depth should be in the form like 6n+4'
+    num_layer_each_block = (args.depth - 4) / 6
+    block_config = [num_layer_each_block, num_layer_each_block, num_layer_each_block]
+    model = DenseNet(input_channels = args.input_channels, growth_rate = args.growth_rate, block_config = block_config,
+        compression = args.compression, efficient = False if args.efficient == 0 else True)
 
     device_ids, model = parse_device_alloc(device_config = None, model = model)
 
@@ -77,3 +92,5 @@ if __name__ == '__main__':
 
     results = train_test(setup_config = setup_config, model = model, train_loader = train_loader, test_loader = test_loader, epoch_num = args.epoch_num,
         optimizer = optimizer, lr_func = lr_func, output_folder = args.output_folder, model_name = args.model_name, device_ids = device_ids, **tricks)
+
+
